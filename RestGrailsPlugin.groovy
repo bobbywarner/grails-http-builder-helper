@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ import groovyx.net.http.AsyncHTTPBuilder
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import java.lang.reflect.InvocationTargetException
 
 /**
@@ -25,60 +27,51 @@ import java.lang.reflect.InvocationTargetException
  */
 class RestGrailsPlugin {
     // the plugin version
-    def version = "0.2"
+    def version = "0.3"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1.1 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp"
+        "grails-app/views/error.gsp"
     ]
 
     def author = "Andres Almiray"
     def authorEmail = "aalmiray@users.sourceforge.net"
     def title = "REST client facilities"
-    def description = '''\\
+    def description = '''
 Adds REST client capabilities to your Grails application.
 '''
+    def observe = ['controllers', 'services']
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/Rest+Plugin"
 
-    def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
-    }
-
-    def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
-    }
-
-    def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional)
-    }
-
     def doWithDynamicMethods = { ctx ->
-        def config = org.codehaus.groovy.grails.commons.ConfigurationHolder.config
-        def types = config.grails?.rest?.injectInto ?: ["Controller"]
-        types.each { type ->
-            application.getArtefacts(type).each{ klass ->
-                addDynamicMethods(klass)
-            }
-        }
+        processArtifacts()
     }
 
     def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
+        processArtifacts()
     }
 
     def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
+        processArtifacts()
     }
 
-   private addDynamicMethods = { klass ->
+   private processArtifacts() {
+      def config = ConfigurationHolder.config
+      def application = ApplicationHolder.application
+      def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
+      types.each { type ->
+         application.getArtefacts(type).each{ klass ->
+            addDynamicMethods(klass)
+         }
+      }
+   }
+
+   private addDynamicMethods(klass) {
       klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass)
       klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass)
       klass.metaClass.withRest = withClient.curry(RESTClient, klass)
