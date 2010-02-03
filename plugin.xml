@@ -1,4 +1,4 @@
-<plugin name='rest' version='0.3' grailsVersion='1.1.1 &gt; *'>
+<plugin name='rest' version='0.3' grailsVersion='1.2.0 &gt; *'>
   <author>Andres Almiray</author>
   <authorEmail>aalmiray@users.sourceforge.net</authorEmail>
   <title>REST client facilities</title>
@@ -6,6 +6,13 @@
 Adds REST client capabilities to your Grails application.
 </description>
   <documentation>http://grails.org/Rest+Plugin</documentation>
-  <resources />
-  <dependencies />
+  <resources>
+    <resource>UrlMappings</resource>
+  </resources>
+  <dependencies>
+    <resolvers>
+      <resolver type='grailsPlugins' name='grailsPlugins' />
+    </resolvers>
+  </dependencies>
+  <behavior />
 </plugin>
