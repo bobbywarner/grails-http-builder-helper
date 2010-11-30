@@ -1,4 +1,4 @@
-<plugin name='rest' version='0.4' grailsVersion='1.2.0 &gt; *'>
+<plugin name='rest' version='0.5' grailsVersion='1.2.0 &gt; *'>
   <author>Andres Almiray</author>
   <authorEmail>aalmiray@users.sourceforge.net</authorEmail>
   <title>REST client facilities</title>
@@ -13,19 +13,11 @@ Adds REST client capabilities to your Grails application.
     <resolvers>
       <resolver type='grailsPlugins' name='grailsPlugins' />
       <resolver type='mavenCentral' />
-      <resolver type='mavenRepo' name='Sonatype' root='https://repository.sonatype.org/content/groups/public' m2compatible='true' />
     </resolvers>
-    <dependency group='org.codehaus.groovy.modules.http-builder' name='http-builder' version='0.5.0-RC2' conf='runtime' transitive='true'>
-      <excludes group='*' name='xercesImpl' />
-    </dependency>
-    <dependency group='xerces' name='xercesImpl' version='2.9.1' conf='compile' transitive='true'>
+    <dependency group='org.codehaus.groovy.modules.http-builder' name='http-builder' version='0.5.0' conf='compile' transitive='true'>
+      <excludes group='*' name='commons-logging' />
       <excludes group='*' name='xml-apis' />
-    </dependency>
-    <dependency group='org.codehaus.groovy.modules.http-builder' name='http-builder' version='0.5.0-RC2' conf='compile' transitive='true'>
-      <excludes group='*' name='xercesImpl' />
-    </dependency>
-    <dependency group='xerces' name='xercesImpl' version='2.9.1' conf='runtime' transitive='true'>
-      <excludes group='*' name='xml-apis' />
+      <excludes group='*' name='groovy' />
     </dependency>
   </dependencies>
   <behavior />
