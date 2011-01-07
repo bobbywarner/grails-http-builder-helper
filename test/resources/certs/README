@@ -1,0 +1,8 @@
+#Certificates
+EquifaxSecureGlobalBusinessCA-1.crt : Cert. from https://dev.java.net
+MyServerCert.cer : Just a simple cert built with the JDK keytool.
+ 
+#Key Stores...
+.keystore : Password changeit
+keystore.jks : Password test1234
+truststore.jks : Password test1234

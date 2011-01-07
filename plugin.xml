@@ -1,5 +1,5 @@
 <plugin name='rest' version='0.5' grailsVersion='1.2.0 &gt; *'>
-  <author>Andres Almiray</author>
+  <author>Andres Almiray, Bernardo Gomez Palacio</author>
   <authorEmail>aalmiray@users.sourceforge.net</authorEmail>
   <title>REST client facilities</title>
   <description>
