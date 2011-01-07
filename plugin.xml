@@ -9,16 +9,6 @@ Adds REST client capabilities to your Grails application.
   <resources>
     <resource>BuildConfig</resource>
   </resources>
-  <dependencies>
-    <resolvers>
-      <resolver type='grailsPlugins' name='grailsPlugins' />
-      <resolver type='mavenCentral' />
-    </resolvers>
-    <dependency group='org.codehaus.groovy.modules.http-builder' name='http-builder' version='0.5.0' conf='compile' transitive='true'>
-      <excludes group='*' name='commons-logging' />
-      <excludes group='*' name='xml-apis' />
-      <excludes group='*' name='groovy' />
-    </dependency>
-  </dependencies>
+  <dependencies />
   <behavior />
 </plugin>
