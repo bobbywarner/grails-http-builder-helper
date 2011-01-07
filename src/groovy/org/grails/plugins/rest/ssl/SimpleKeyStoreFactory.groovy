@@ -30,7 +30,7 @@ class SimpleKeyStoreFactory implements KeyStoreFactory {
   protected def getResourceFromFile = { String path ->
     def resource = new FileSystemResource(path)
     try {
-      return resource.URL ?: null
+      return resource.URL ? resource : null
     } catch (FileNotFoundException e) {
       log.trace "Unable to load ${path} through the File System.", e
     }
@@ -42,7 +42,7 @@ class SimpleKeyStoreFactory implements KeyStoreFactory {
   protected def getResourceFromClassPath = { String path ->
     def resource = new ClassPathResource(path)
     try {
-      return resource.URL ?: null
+      return resource.URL ? resource : null
     } catch (FileNotFoundException e) {
       log.trace "Unable to load ${path} through the Class Loader.", e
     }
@@ -88,13 +88,13 @@ class SimpleKeyStoreFactory implements KeyStoreFactory {
           correctPasswd = passwd;
           break;
         } catch (CertificateException e) {
-          log.debug e
+          log.debug e.message,e
         } catch (NoSuchAlgorithmException e) {
-          log.debug e
+          log.debug e.message,e
         } catch (FileNotFoundException e) {
-          log.debug e
+          log.debug e.message,e
         } catch (IOException e) {
-          log.debug e
+          log.debug e.message,e
         }
       }
       return correctPasswd ? [path: path, URL: resource.URL.toString(), keystore: keyStore, password: correctPasswd] : null
