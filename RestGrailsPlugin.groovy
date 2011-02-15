@@ -33,7 +33,7 @@ import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
  */
 class RestGrailsPlugin {
   // the plugin version
-  def version = "0.6"
+  def version = "0.6.1"
   // the version or versions of Grails the plugin is designed for
   def grailsVersion = "1.2.0 > *"
   // the other plugins this plugin depends on
@@ -96,7 +96,7 @@ Adds REST client capabilities to your Grails application.
     if (params.id) {
       String id = params.remove("id").toString()
       if (target.metaClass.hasProperty(target, id)) {
-        client = target."$id"
+        client = target.metaClass.getProperty(target, id)
       } else {
         client = makeClient(klass, params)
         target.metaClass."$id" = client
