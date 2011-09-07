@@ -17,144 +17,72 @@
 import groovyx.net.http.AsyncHTTPBuilder
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
-import org.apache.http.conn.scheme.Scheme
-import org.apache.http.conn.ssl.SSLSocketFactory
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import java.lang.reflect.InvocationTargetException
-
-import org.grails.plugins.rest.ssl.HTTPBuilderSSLHelper
-import org.grails.plugins.rest.ssl.HTTPBuilderSSLConstants
-import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
+import org.grails.plugins.rest.RestClientFixture
+import org.grails.plugins.rest.RestConfig
 
 /**
- * @author Andres.Almiray
+ * @author Andres.Almiray , Bernardo.GomezPalacio
  */
 class RestGrailsPlugin {
-  // the plugin version
-  def version = "0.6.1"
-  // the version or versions of Grails the plugin is designed for
-  def grailsVersion = "1.2.0 > *"
-  // the other plugins this plugin depends on
-  def dependsOn = [:]
-  // resources that are excluded from plugin packaging
-  def pluginExcludes = [
-          "grails-app/views/error.gsp"
-  ]
+    // the plugin version
+    def version = "0.7.0-SNAPSHOT"
+    // the version or versions of Grails the plugin is designed for
+    def grailsVersion = "1.2.0 > *"
+    // the other plugins this plugin depends on
+    def dependsOn = [:]
+    // resources that are excluded from plugin packaging
+    def pluginExcludes = [
+            "grails-app/conf/UrlMappings.groovy",
+            "grails-app/views/",
+            "web-app/"
+    ]
 
-  def author = "Andres Almiray, Bernardo Gomez-Palacio"
-  def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com"
-  def title = "REST client facilities"
-  def description = '''
+    def author = "Andres Almiray, Bernardo Gomez-Palacio"
+    def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com"
+    def title = "REST client facilities"
+    def description = '''
 Adds REST client capabilities to your Grails application.
 '''
-  def observe = ['controllers', 'services']
+    def observe = ['controllers', 'services']
 
-  // URL to the plugin's documentation
-  def documentation = "http://grails.org/Rest+Plugin"
+    // URL to the plugin's documentation
+    def documentation = "http://grails.org/Rest+Plugin"
 
-  /**
-   */
-  HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
-
-
-
-  def doWithDynamicMethods = { ctx ->
-    processArtifacts()
-  }
-
-  def onChange = { event ->
-    processArtifacts()
-  }
-
-  def onConfigChange = { event ->
-    processArtifacts()
-  }
-
-  private processArtifacts() {
-    def config = ConfigurationHolder.config
-    def application = ApplicationHolder.application
-    def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
-    types.each { type ->
-      application.getArtefacts(type).each { klass ->
-        addDynamicMethods(klass)
-      }
-    }
-  }
-
-  private addDynamicMethods(klass) {
-    klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass)
-    klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass)
-    klass.metaClass.withRest = withClient.curry(RESTClient, klass)
-  }
-
-  // ======================================================
-
-  private withClient = { Class klass, Object target, Map params, Closure closure ->
-    def client = null
-    if (params.id) {
-      String id = params.remove("id").toString()
-      if (target.metaClass.hasProperty(target, id)) {
-        client = target.metaClass.getProperty(target, id)
-      } else {
-        client = makeClient(klass, params)
-        target.metaClass."$id" = client
-      }
-    } else {
-      client = makeClient(klass, params)
+    def doWithDynamicMethods = { ctx ->
+        processArtifacts()
     }
 
-    if (params.containsKey("proxy")) {
-      Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
-      if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
-      client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
+    def onChange = { event ->
+        processArtifacts()
     }
 
-    if (closure) {
-      closure.delegate = client
-      closure.resolveStrategy = Closure.DELEGATE_FIRST
-      closure()
+    def onConfigChange = { event ->
+        processArtifacts()
     }
-  }
 
-  private makeClient(Class klass, Map params) {
-
-    def client
-
-    if (klass == AsyncHTTPBuilder) {
-      try {
-        Map args = [:]
-        ["threadPool", "poolSize", "uri", "contentType", "timeout"].each { arg ->
-          if (params[(arg)] != null) args[(arg)] = params[(arg)]
+    private processArtifacts() {
+        final def applicationContext = ApplicationHolder.application
+        RestConfig restConfig = RestClientFixture.getConfig(applicationContext.config)
+        restConfig.injectInto.value.each { type ->
+            applicationContext.getArtefacts(type).each { artifactClass ->
+                addDynamicMethods(restConfig, artifactClass)
+            }
         }
-        client = klass.newInstance(args)
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException("Failed to create async http client reason: $e", e)
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException("Failed to create async http client reason: $e", e)
-      }
-    }
-    try {
-      client = klass.newInstance()
-      if (params.uri) client.uri = params.remove("uri")
-      if (params.contentType) client.contentType = params.remove("contentType")
-
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
     }
 
-    if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
-      try {
-        sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-      } catch (IllegalStateException e) {
-        throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-      }
+    private addDynamicMethods(RestConfig restConfig, artifactClass) {
+
+        artifactClass.metaClass.withAsyncHttp =
+            RestClientFixture.&withClient.curry(restConfig, AsyncHTTPBuilder, artifactClass)
+
+        artifactClass.metaClass.withHttp =
+            RestClientFixture.&withClient.curry(restConfig, HTTPBuilder, artifactClass)
+
+        artifactClass.metaClass.withRest =
+            RestClientFixture.&withClient.curry(restConfig, RESTClient, artifactClass)
     }
-    return client
-  }
+
 }

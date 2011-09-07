@@ -57,7 +57,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   void testAddSSLSupportWithoutKeysForFailingCall() {
     mockConfig ''
 
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: { null },
@@ -81,7 +81,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   void testAddSSLSupportWithoutKeysForSuccessfulCall() {
     mockConfig ''
 
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: { null },
@@ -104,7 +104,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   void testEnforceSSLSocketFactoryCalltestEnforceSSLSocketFactoryCall() {
     mockConfig 'rest.https.sslSocketFactory.enforce=true'
 
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: { null },
@@ -147,7 +147,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   void testAddSSLSupportWithKeyStoreOnly() {
 
     mockConfig ''
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
               knownKeyStoreModel
@@ -162,7 +162,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   /** */
   void testAddSSLSupportWithTrustStoreOnly() {
     mockConfig ''
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
               null
@@ -177,7 +177,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   /** */
   void testAddSSLSupportWithAllStores() {
     mockConfig ''
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
@@ -195,7 +195,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
   void testAddSSLSupportWithStrictCert() {
 
     mockConfig "https.cert.hostnameVerifier='strict'"
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
@@ -228,7 +228,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
 
     mockConfig "https.cert.hostnameVerifier='BROWSER_COMPATIBLE'"
 
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
@@ -260,7 +260,7 @@ class SimpleHTTPBuilderSSLHelperTests extends GrailsUnitTestCase {
 
     mockConfig "https.cert.hostnameVerifier='allow_all'"
 
-    SimpleHTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+    SSLCustomization sslHelper = new SSLCustomization()
 
     sslHelper.restPluginKeyStoreFactory = [
             getKeyStoreModel: {
