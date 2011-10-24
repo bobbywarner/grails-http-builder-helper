@@ -1,0 +1,7 @@
+application.properties
+.classpath
+.project
+.settings/
+target-eclipse/
+target/
+web-app/
