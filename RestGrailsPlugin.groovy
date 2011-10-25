@@ -32,146 +32,138 @@ import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
  * @author Andres.Almiray
  */
 class RestGrailsPlugin {
-  // the plugin version
-  def version = "0.6.1"
-  // the version or versions of Grails the plugin is designed for
-  def grailsVersion = "1.2.0 > *"
-  // the other plugins this plugin depends on
-  def dependsOn = [:]
-  // resources that are excluded from plugin packaging
-  def pluginExcludes = [
-          "grails-app/views/error.gsp"
-  ]
+	// the plugin version
+	def version = "0.6.1"
+	// the version or versions of Grails the plugin is designed for
+	def grailsVersion = "1.2.0 > *"
+	// the other plugins this plugin depends on
+	def dependsOn = [:]
+	// resources that are excluded from plugin packaging
+	def pluginExcludes = [
+		"grails-app/views/error.gsp"
+	]
 
-  def author = "Andres Almiray, Bernardo Gomez-Palacio"
-  def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com"
-  def title = "REST client facilities"
-  def description = '''
+	def author = "Andres Almiray, Bernardo Gomez-Palacio"
+	def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com"
+	def title = "REST client facilities"
+	def description = '''
 Adds REST client capabilities to your Grails application.
 '''
-  def observe = ['controllers', 'services']
+	def observe = ['controllers', 'services']
 
-  // URL to the plugin's documentation
-  def documentation = "http://grails.org/Rest+Plugin"
+	// URL to the plugin's documentation
+	def documentation = "http://grails.org/Rest+Plugin"
 
-  /**
-   */
-  HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+	/**
+	 */
+	HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
-  def doWithDynamicMethods = { ctx ->
-    processArtifacts()
-  }
+	def doWithDynamicMethods = { ctx -> processArtifacts() }
 
-  def onChange = { event ->
-    processArtifacts()
-  }
+	def onChange = { event -> processArtifacts() }
 
-  def onConfigChange = { event ->
-    processArtifacts()
-  }
+	def onConfigChange = { event -> processArtifacts() }
 
-  private processArtifacts() {
-    def config = ConfigurationHolder.config
-    def application = ApplicationHolder.application
-    def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
-    types.each { type ->
-      application.getArtefacts(type).each { klass ->
-        addDynamicMethods(klass)
-      }
-    }
-  }
+	private processArtifacts() {
+		def config = ConfigurationHolder.config
+		def application = ApplicationHolder.application
+		def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
+		types.each { type ->
+			application.getArtefacts(type).each { klass -> addDynamicMethods(klass) }
+		}
+	}
 
-  private addDynamicMethods(klass) {
-    klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass)
-    klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass)
-    klass.metaClass.withRest = withClient.curry(RESTClient, klass)
-  }
+	private addDynamicMethods(klass) {
+		klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass)
+		klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass)
+		klass.metaClass.withRest = withClient.curry(RESTClient, klass)
+	}
 
-  // ======================================================
+	// ======================================================
 
-  private withClient = { Class klass, Object target, Map params, Closure closure ->
-    def client = null
-    if (params.id) {
-      String id = params.remove("id").toString()
-      if (target.metaClass.hasProperty(target, id)) {
-        client = target.metaClass.getProperty(target, id)
-      } else {
-        client = makeClient(klass, params)
-        target.metaClass."$id" = client
-      }
-    } else {
-      client = makeClient(klass, params)
-    }
+	private withClient = { Class klass, Object target, Map params, Closure closure ->
+		def client = null
+		if (params.id) {
+			String id = params.remove("id").toString()
+			if (target.metaClass.hasProperty(target, id)) {
+				client = target.metaClass.getProperty(target, id)
+			} else {
+				client = makeClient(klass, params)
+				target.metaClass."$id" = client
+			}
+		} else {
+			client = makeClient(klass, params)
+		}
 
-    if (params.containsKey("proxy")) {
-      Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
-      if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
-      client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
-    }
+		if (params.containsKey("proxy")) {
+			Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
+			if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
+			client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
+		}
 
-    if (closure) {
-      closure.delegate = client
-      closure.resolveStrategy = Closure.DELEGATE_FIRST
-      closure()
-    }
-  }
+		if (closure) {
+			closure.delegate = client
+			closure.resolveStrategy = Closure.DELEGATE_FIRST
+			closure()
+		}
+	}
 
-  private makeClient(Class klass, Map params) {
-    def client
-    if (klass == AsyncHTTPBuilder) {
-      client = makeAsyncClient(klass, params)
+	private makeClient(Class klass, Map params) {
+		def client
+		if (klass == AsyncHTTPBuilder) {
+			client = makeAsyncClient(klass, params)
 
-    } else {
-      client = makeSyncClient(klass, params)
-    }
+		} else {
+			client = makeSyncClient(klass, params)
+		}
 
-    if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
+		if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
 			addSSLSupport(client)
-    }
-		
-    return client
-  }
-  
-  private makeAsyncClient(Class klass, Map params){
-    def client
-    try {
-      Map args = [:]
-      [ "threadPool", "poolSize", "uri", "contentType", "timeout" ].each { arg ->
-        if (params[(arg)] != null) args[(arg)] = params[(arg)]
-      }
-      client = klass.newInstance(args)
-			
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Failed to create async http client reason: $e", e)
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException("Failed to create async http client reason: $e", e)
-    }
-    return client
-  }
-  
-  private makeSyncClient(Class klass, Map params){
-    def client
-    try {
-      client = klass.newInstance()
-      if (params.uri) client.uri = params.remove("uri")
-      if (params.contentType) client.contentType = params.remove("contentType")
+		}
 
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
-    }
-    return client
-  }
+		return client
+	}
+
+	private makeAsyncClient(Class klass, Map params){
+		def client
+		try {
+			Map args = [:]
+			[ "threadPool", "poolSize", "uri", "contentType", "timeout" ].each { arg ->
+				if (params[(arg)] != null) args[(arg)] = params[(arg)]
+			}
+			client = klass.newInstance(args)
+
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Failed to create async http client reason: $e", e)
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException("Failed to create async http client reason: $e", e)
+		}
+		return client
+	}
+
+	private makeSyncClient(Class klass, Map params){
+		def client
+		try {
+			client = klass.newInstance()
+			if (params.uri) client.uri = params.remove("uri")
+			if (params.contentType) client.contentType = params.remove("contentType")
+
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
+		}
+		return client
+	}
 
 	private addSSLSupport(client){
 		try {
-      sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
+			sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
 
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-    } catch (IllegalStateException e) {
-      throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-    }
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+		} catch (IllegalStateException e) {
+			throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+		}
 	}
 }
