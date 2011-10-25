@@ -19,6 +19,7 @@ import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
+import org.apache.http.impl.conn.ProxySelectorRoutePlanner
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -95,9 +96,7 @@ Adds REST client capabilities to your Grails application.
 			client = makeClient(klass, params)
 		}
 
-		if (params.containsKey("proxy")) {
-			setClientProxyParams(client, params)
-		}
+		setRoutePlanner(client)
 
 		if (closure) {
 			closure.delegate = client
@@ -165,9 +164,10 @@ Adds REST client capabilities to your Grails application.
 		}
 	}
 	
-	private setClientProxyParams(client, Map params){
-		Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
-		if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
-		client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
+	private setRoutePlanner(builder){
+		builder.client.routePlanner = new ProxySelectorRoutePlanner(
+			builder.client.connectionManager.schemeRegistry,
+    		ProxySelector.default
+		)
 	}
 }
