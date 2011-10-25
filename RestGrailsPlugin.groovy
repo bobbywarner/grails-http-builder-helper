@@ -96,9 +96,7 @@ Adds REST client capabilities to your Grails application.
 		}
 
 		if (params.containsKey("proxy")) {
-			Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
-			if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
-			client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
+			setClientProxyParams(client, params)
 		}
 
 		if (closure) {
@@ -165,5 +163,11 @@ Adds REST client capabilities to your Grails application.
 		} catch (IllegalStateException e) {
 			throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
 		}
+	}
+	
+	private setClientProxyParams(client, Map params){
+		Map proxyArgs = [scheme: "http", port: 80] + params.remove("proxy")
+		if (!proxyArgs.host) throw new IllegalArgumentException("proxy.host cannot be null!")
+		client.setProxy(proxyArgs.host, proxyArgs.port as int, proxyArgs.scheme)
 	}
 }
