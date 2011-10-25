@@ -119,10 +119,10 @@ Adds REST client capabilities to your Grails application.
   private makeClient(Class klass, Map params) {
     def client
     if (klass == AsyncHTTPBuilder) {
-      client = makeAsyncClient(params)
+      client = makeAsyncClient(klass, params)
 
     } else {
-      client = makeSyncClient(params)
+      client = makeSyncClient(klass, params)
     }
 
     if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
@@ -132,7 +132,7 @@ Adds REST client capabilities to your Grails application.
     return client
   }
   
-  private makeAsyncClient(Map params){
+  private makeAsyncClient(Class klass, Map params){
     def client
     try {
       Map args = [:]
@@ -149,7 +149,7 @@ Adds REST client capabilities to your Grails application.
     return client
   }
   
-  private makeSyncClient(Map params){
+  private makeSyncClient(Class klass, Map params){
     def client
     try {
       client = klass.newInstance()
