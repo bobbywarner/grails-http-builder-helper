@@ -58,8 +58,6 @@ Adds REST client capabilities to your Grails application.
    */
   HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
-
-
   def doWithDynamicMethods = { ctx ->
     processArtifacts()
   }
@@ -119,22 +117,40 @@ Adds REST client capabilities to your Grails application.
   }
 
   private makeClient(Class klass, Map params) {
-
     def client
-
     if (klass == AsyncHTTPBuilder) {
-      try {
-        Map args = [:]
-        ["threadPool", "poolSize", "uri", "contentType", "timeout"].each { arg ->
-          if (params[(arg)] != null) args[(arg)] = params[(arg)]
-        }
-        client = klass.newInstance(args)
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException("Failed to create async http client reason: $e", e)
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException("Failed to create async http client reason: $e", e)
-      }
+      client = makeAsyncClient(params)
+
+    } else {
+      client = makeSyncClient(params)
     }
+
+    if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
+			addSSLSupport(client)
+    }
+		
+    return client
+  }
+  
+  private makeAsyncClient(Map params){
+    def client
+    try {
+      Map args = [:]
+      [ "threadPool", "poolSize", "uri", "contentType", "timeout" ].each { arg ->
+        if (params[(arg)] != null) args[(arg)] = params[(arg)]
+      }
+      client = klass.newInstance(args)
+			
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException("Failed to create async http client reason: $e", e)
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException("Failed to create async http client reason: $e", e)
+    }
+    return client
+  }
+  
+  private makeSyncClient(Map params){
+    def client
     try {
       client = klass.newInstance()
       if (params.uri) client.uri = params.remove("uri")
@@ -145,16 +161,17 @@ Adds REST client capabilities to your Grails application.
     } catch (InvocationTargetException e) {
       throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
     }
-
-    if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
-      try {
-        sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-      } catch (IllegalStateException e) {
-        throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
-      }
-    }
     return client
   }
+
+	private addSSLSupport(client){
+		try {
+      sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
+
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+    } catch (IllegalStateException e) {
+      throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+    }
+	}
 }
