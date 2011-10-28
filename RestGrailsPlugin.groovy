@@ -34,7 +34,7 @@ import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
  */
 class RestGrailsPlugin {
 	// the plugin version
-	def version = "0.6.1"
+	def version = "0.7"
 	// the version or versions of Grails the plugin is designed for
 	def grailsVersion = "1.2.0 > *"
 	// the other plugins this plugin depends on
@@ -44,8 +44,8 @@ class RestGrailsPlugin {
 		"grails-app/views/error.gsp"
 	]
 
-	def author = "Andres Almiray, Bernardo Gomez-Palacio"
-	def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com"
+	def author = "Andres Almiray, Bernardo Gomez-Palacio, Marco Vermeulen"
+	def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com, vermeulen.mp@gmail.com"
 	def title = "REST client facilities"
 	def description = '''
 Adds REST client capabilities to your Grails application.
