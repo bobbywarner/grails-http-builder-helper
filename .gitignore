@@ -5,3 +5,4 @@ application.properties
 target-eclipse/
 target/
 web-app/
+bin/
