@@ -6,10 +6,8 @@
 package org.grails.plugins.rest.ssl
 
 import grails.test.GrailsUnitTestCase
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
- *
  * @author berngp
  */
 class SimpleKeyStoreFactoryTests extends GrailsUnitTestCase {
@@ -24,27 +22,17 @@ class SimpleKeyStoreFactoryTests extends GrailsUnitTestCase {
     https.truststore.pass='test1234'
     '''
 
-
-  protected void setUp() {
-    super.setUp()
-
-  }
-
-  protected void tearDown() {
-    super.tearDown()
-  }
-
   void testGetKeyStoreFromConf() {
-    mockConfig KEYSTORE_CONFIG
+    def config = mockConfig(KEYSTORE_CONFIG)
 
     SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-    def keyStoreModel = sksf.getKeyStoreModel(ConfigurationHolder.config)
+    def keyStoreModel = sksf.getKeyStoreModel(config)
     assert keyStoreModel.keystore, "KeyStore expected"
   }
 
   void testGetKeyStoreFromDefault() {
 
-    mockConfig ''
+    def config = mockConfig('')
 
     SimpleKeyStoreFactory.metaClass.getDefaultKeyStoreHome = {
       'test/resources/certs'
@@ -52,27 +40,25 @@ class SimpleKeyStoreFactoryTests extends GrailsUnitTestCase {
 
     SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
 
-    def keyStoreModel = sksf.getKeyStoreModel(ConfigurationHolder.config)
+    def keyStoreModel = sksf.getKeyStoreModel(config)
     assert keyStoreModel.keystore, "KeyStore expected "
     assert keyStoreModel.path == "test/resources/certs/.keystore"
   }
 
   void testGetTrustStoreFromConf() {
-    mockConfig TRUSTSTORE_CONFIG
+    def config = mockConfig(TRUSTSTORE_CONFIG)
 
     SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-    def trustStoreModel = sksf.getTrustStoreModel(ConfigurationHolder.config)
+    def trustStoreModel = sksf.getTrustStoreModel(config)
     assert trustStoreModel.keystore, "KeyStore expected"
   }
 
   void testGetTrustStoreFromDefault() {
-    mockConfig ''
+    def config = mockConfig('')
 
     SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-    def trustStoreModel = sksf.getTrustStoreModel(ConfigurationHolder.config)
+    def trustStoreModel = sksf.getTrustStoreModel(config)
     assert trustStoreModel.keystore, "KeyStore expected"
     assert trustStoreModel.path == '/truststore.jks'
   }
-
 }
-

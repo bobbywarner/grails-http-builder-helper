@@ -17,83 +17,72 @@
 import groovyx.net.http.AsyncHTTPBuilder
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
-import org.apache.http.conn.scheme.Scheme
-import org.apache.http.conn.ssl.SSLSocketFactory
-import org.apache.http.impl.conn.ProxySelectorRoutePlanner
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import java.lang.reflect.InvocationTargetException
 
-import org.grails.plugins.rest.ssl.HTTPBuilderSSLHelper
+import org.apache.http.impl.conn.ProxySelectorRoutePlanner
 import org.grails.plugins.rest.ssl.HTTPBuilderSSLConstants
+import org.grails.plugins.rest.ssl.HTTPBuilderSSLHelper
 import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
 
 /**
  * @author Andres.Almiray
  */
 class RestGrailsPlugin {
-	// the plugin version
 	def version = "0.8"
-	// the version or versions of Grails the plugin is designed for
 	def grailsVersion = "2.0 > *"
-	// the other plugins this plugin depends on
-	def dependsOn = [:]
-	// resources that are excluded from plugin packaging
-	def pluginExcludes = [
-		"grails-app/views/error.gsp"
-	]
 
-	def author = "Andres Almiray, Bernardo Gomez-Palacio, Marco Vermeulen"
-	def authorEmail = "aalmiray@users.sourceforge.net, bernardo.gomezpalacio@gmail.com, vermeulen.mp@gmail.com"
-	def title = "REST client facilities"
-	def description = '''
-Adds REST client capabilities to your Grails application.
-'''
+	def title = "Grails REST Plugin"
+	def description = 'Adds REST client capabilities to your Grails application.'
 	def observe = ['controllers', 'services']
 
-	// URL to the plugin's documentation
-	def documentation = "http://grails.org/Rest+Plugin"
+	def documentation = "http://grails.org/plugin/rest"
 
-	/**
-	 */
-	HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
+	def license = "APACHE"
+	def developers = [
+		[name: "Andres Almiray", email: "aalmiray@users.sourceforge.net"],
+		[name: "Bernardo Gomez-Palacio", email: "bernardo.gomezpalacio@gmail.com"],
+		[name: "Marco Vermeulen", email: "vermeulen.mp@gmail.com"]
+	]
+	def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+	def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
 
-	def doWithDynamicMethods = { ctx -> processArtifacts() }
+	private HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
-	def onChange = { event -> processArtifacts() }
+	def doWithDynamicMethods = { ctx -> processArtifacts(application) }
 
-	def onConfigChange = { event -> processArtifacts() }
+	def onChange = { event -> processArtifacts(application) }
 
-	private processArtifacts() {
-		def config = ConfigurationHolder.config
-		def application = ApplicationHolder.application
+	def onConfigChange = { event -> processArtifacts(application) }
+
+	private void processArtifacts(application) {
+		def config = application.config
 		def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
 		types.each { type ->
-			application.getArtefacts(type).each { klass -> addDynamicMethods(klass) }
+			application.getArtefacts(type).each { klass -> addDynamicMethods(klass, application) }
 		}
 	}
 
-	private addDynamicMethods(klass) {
-		klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass)
-		klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass)
-		klass.metaClass.withRest = withClient.curry(RESTClient, klass)
+	private void addDynamicMethods(klass, application) {
+		klass.metaClass.withAsyncHttp = withClient.curry(AsyncHTTPBuilder, klass, application)
+		klass.metaClass.withHttp = withClient.curry(HTTPBuilder, klass, application)
+		klass.metaClass.withRest = withClient.curry(RESTClient, klass, application)
 	}
 
 	// ======================================================
 
-	private withClient = { Class klass, Object target, Map params, Closure closure ->
-		def client = null
+	private withClient = { Class klass, Object target, application, Map params, Closure closure ->
+		def client
 		if (params.id) {
 			String id = params.remove("id").toString()
 			if (target.metaClass.hasProperty(target, id)) {
 				client = target.metaClass.getProperty(target, id)
 			} else {
-				client = makeClient(klass, params)
+				client = makeClient(klass, params, application)
 				target.metaClass."$id" = client
 			}
 		} else {
-			client = makeClient(klass, params)
+			client = makeClient(klass, params, application)
 		}
 
 		setRoutePlanner(client)
@@ -105,7 +94,7 @@ Adds REST client capabilities to your Grails application.
 		}
 	}
 
-	private makeClient(Class klass, Map params) {
+	private makeClient(Class klass, Map params, application) {
 		def client
 		if (klass == AsyncHTTPBuilder) {
 			client = makeAsyncClient(klass, params)
@@ -115,7 +104,7 @@ Adds REST client capabilities to your Grails application.
 		}
 
 		if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
-			addSSLSupport(client)
+			addSSLSupport(client, application)
 		}
 
 		return client
@@ -153,16 +142,16 @@ Adds REST client capabilities to your Grails application.
 		return client
 	}
 
-	private addSSLSupport(client){
+	private addSSLSupport(client, application){
 		try {
-			sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
+			sslHelper.addSSLSupport(application.config?.rest, client)
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException("Failed to add ssl support : ${e.message}", e)
 		} catch (IllegalStateException e) {
 			throw new RuntimeException("Failed to add ssl support : ${e.message}", e)
 		}
 	}
-	
+
 	private setRoutePlanner(builder){
 		builder.client.routePlanner = new ProxySelectorRoutePlanner(
 			builder.client.connectionManager.schemeRegistry,
