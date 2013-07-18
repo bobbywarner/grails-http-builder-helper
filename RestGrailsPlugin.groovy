@@ -34,9 +34,9 @@ import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
  */
 class RestGrailsPlugin {
 	// the plugin version
-	def version = "0.7"
+	def version = "0.8"
 	// the version or versions of Grails the plugin is designed for
-	def grailsVersion = "1.2.0 > *"
+	def grailsVersion = "2.2 > *"
 	// the other plugins this plugin depends on
 	def dependsOn = [:]
 	// resources that are excluded from plugin packaging
@@ -156,11 +156,10 @@ Adds REST client capabilities to your Grails application.
 	private addSSLSupport(client){
 		try {
 			sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
-
 		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+			throw new RuntimeException("Failed to add ssl support : ${e.message}", e)
 		} catch (IllegalStateException e) {
-			throw new RuntimeException("Failed to add ssl support to ${(klass == HTTPBuilder ? 'https' : 'rest')} client reason: $e", e)
+			throw new RuntimeException("Failed to add ssl support : ${e.message}", e)
 		}
 	}
 	
