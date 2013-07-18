@@ -115,7 +115,7 @@ Adds REST client capabilities to your Grails application.
 		}
 
 		if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
-			addSSLSupport(client)
+			addSSLSupport(klass, client)
 		}
 
 		return client
@@ -153,7 +153,7 @@ Adds REST client capabilities to your Grails application.
 		return client
 	}
 
-	private addSSLSupport(client){
+	private addSSLSupport(klass, client){
 		try {
 			sslHelper.addSSLSupport(ConfigurationHolder.config?.rest, client)
 		} catch (IllegalArgumentException e) {
