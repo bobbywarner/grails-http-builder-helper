@@ -9,7 +9,7 @@ grails.project.dependency.resolution = {
     repositories {
         grailsPlugins()
         grailsHome()
-        // grailsCentral()
+        grailsCentral()
         mavenCentral()
         mavenRepo name: 'Codehaus', root: 'http://repository.codehaus.org', m2compatible: true
         // mavenRepo name: 'Sonatype', root: 'https://repository.sonatype.org/content/groups/public', m2compatible: true
@@ -18,8 +18,9 @@ grails.project.dependency.resolution = {
         compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
             excludes "commons-logging", "xml-apis", "groovy"
         }
-        // compile('xerces:xercesImpl:2.9.1') { exclude 'xml-apis'}
-        // runtime('org.codehaus.groovy.modules.http-builder:http-builder:0.5.0-RC2') {exclude 'xercesImpl'}
-        // runtime('xerces:xercesImpl:2.9.1') { exclude 'xml-apis'}
     }
+    plugins {
+        build ':release:2.2.1'
+    }
+
 }

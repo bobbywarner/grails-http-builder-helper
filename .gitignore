@@ -6,3 +6,6 @@ target-eclipse/
 target/
 web-app/
 bin/
+plugin.xml
+grails-rest-0.8.zip
+grails-rest-0.8.zip.sha1
