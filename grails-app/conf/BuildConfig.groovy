@@ -1,26 +1,26 @@
-grails.project.class.dir = "target/classes"
-grails.project.test.class.dir = "target/test-classes"
-grails.project.test.reports.dir = "target/test-reports"
-
+grails.project.work.dir = 'target'
 
 grails.project.dependency.resolution = {
-    inherits('global')
+
+    inherits 'global'
     log 'warn'
+
     repositories {
-        grailsPlugins()
-        grailsHome()
         grailsCentral()
-        mavenCentral()
         mavenRepo name: 'Codehaus', root: 'http://repository.codehaus.org', m2compatible: true
-        // mavenRepo name: 'Sonatype', root: 'https://repository.sonatype.org/content/groups/public', m2compatible: true
+        mavenLocal()
+        mavenCentral()
     }
+
     dependencies {
         compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
             excludes "commons-logging", "xml-apis", "groovy"
         }
     }
-    plugins {
-        build ':release:2.2.1'
-    }
 
+    plugins {
+        build ':release:2.2.1', ':rest-client-builder:1.0.3', {
+            export = false
+        }
+    }
 }
