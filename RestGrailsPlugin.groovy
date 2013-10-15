@@ -44,8 +44,8 @@ class RestGrailsPlugin {
 		[name: "Bernardo Gomez-Palacio", email: "bernardo.gomezpalacio@gmail.com"],
 		[name: "Marco Vermeulen", email: "vermeulen.mp@gmail.com"]
 	]
-	def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
-	def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
+	def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPREST" ]
+	def scm = [ url: "https://github.com/berngp/grails-rest" ]
 
 	private HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
