@@ -133,7 +133,7 @@ class RestGrailsPlugin {
 			client = klass.newInstance()
 			if (params.uri) client.uri = params.remove("uri")
 			if (params.contentType) client.contentType = params.remove("contentType")
-
+			if (params.charset) client.getEncoder().setCharset(params.remove("charset"))
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException("Failed to create ${(klass == HTTPBuilder ? 'http' : 'rest')} client reason: $e", e)
 		} catch (InvocationTargetException e) {
