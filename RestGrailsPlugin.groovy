@@ -29,7 +29,7 @@ import org.grails.plugins.rest.ssl.SimpleHTTPBuilderSSLHelper
  * @author Andres.Almiray
  */
 class RestGrailsPlugin {
-	def version = "0.8"
+	def version = "0.9"
 	def grailsVersion = "2.0 > *"
 
 	def title = "Grails REST Plugin"
