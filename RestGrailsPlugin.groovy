@@ -96,6 +96,7 @@ class RestGrailsPlugin {
 
 	private makeClient(Class klass, Map params, application) {
 		def client
+                def ignoreSSLIssues = (params.ignoreSSLIssues)?params.remove("ignoreSSLIssues"):false
 		if (klass == AsyncHTTPBuilder) {
 			client = makeAsyncClient(klass, params)
 
@@ -104,7 +105,7 @@ class RestGrailsPlugin {
 		}
 
 		if (HTTPBuilderSSLConstants.HTTPS == client.uri.toURL().protocol) {
-			addSSLSupport(client, application)
+			(ignoreSSLIssues)?client.ignoreSSLIssues():addSSLSupport(client, application)
 		}
 
 		return client
