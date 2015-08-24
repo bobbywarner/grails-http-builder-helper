@@ -16,13 +16,13 @@ interface KeyStoreFactory {
    *  <li>password: Password used to access such <i>Key Store</i>.</li>
    * </ul>
    */
-  Map getKeyStoreModel(ConfigObject config)
+  Map getKeyStoreModel()
   /**
    * Loads a given <i>Trust Store</i> returning the following model that most contain.
    * <ul>
    *  <li>keystore: Instance of a java.security.KeyStore that has been configured with the specific <i>Trust Store</i>.</li>
    * </ul>
    */
-  Map getTrustStoreModel(ConfigObject config)
+  Map getTrustStoreModel()
 
 }

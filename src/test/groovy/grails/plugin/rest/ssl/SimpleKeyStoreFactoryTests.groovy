@@ -1,44 +1,69 @@
 package grails.plugin.rest.ssl
 
-class SimpleKeyStoreFactoryTests extends GroovyTestCase {
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import spock.lang.Specification
 
-    ConfigObject keystoreConfig = new ConfigObject()
-    ConfigObject truststoreConfig = new ConfigObject()
+@TestMixin(GrailsUnitTestMixin)
+class SimpleKeyStoreFactoryTests extends Specification {
 
     void testGetKeyStoreFromConf() {
-        keystoreConfig.put('https.keystore.path', 'classpath:certs/keystore.jks')
-        keystoreConfig.put('https.keystore.pass', 'test1234')
+        given:
+        config.https.keystore.path = 'src/test/resources/certs/keystore.jks'
+        config.https.keystore.pass = 'test1234'
 
+        when:
         SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-        def keyStoreModel = sksf.getKeyStoreModel(keystoreConfig)
-        assert keyStoreModel.keystore, "KeyStore expected"
+        def keyStoreModel = sksf.getKeyStoreModel()
+
+        then:
+        keyStoreModel.keystore != null
     }
 
     void testGetKeyStoreFromDefault() {
+        given:
         SimpleKeyStoreFactory.metaClass.getDefaultKeyStoreHome = {
-            'test/resources/certs'
+            'src/test/resources/certs'
         }
+        config.https.keystore.path = ''
+        config.https.keystore.pass = ''
 
+        when:
         SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
+        def keyStoreModel = sksf.getKeyStoreModel()
 
-        def keyStoreModel = sksf.getKeyStoreModel(new ConfigObject())
-        assert keyStoreModel.keystore, "KeyStore expected "
-        assert keyStoreModel.path == "classpath:certs/.keystore"
+        then:
+        keyStoreModel.keystore != null
+        keyStoreModel.path == "src/test/resources/certs/.keystore"
     }
 
     void testGetTrustStoreFromConf() {
-        truststoreConfig.put('https.truststore.path', 'classpath:certs/truststore.jks')
-        truststoreConfig.put('https.truststore.pass', 'test1234')
+        given:
+        config.https.truststore.path = 'src/test/resources/certs/truststore.jks'
+        config.https.truststore.pass = 'test1234'
 
+        when:
         SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-        def trustStoreModel = sksf.getTrustStoreModel(truststoreConfig)
-        assert trustStoreModel.keystore, "KeyStore expected"
+        def trustStoreModel = sksf.getTrustStoreModel()
+
+        then:
+        trustStoreModel.keystore != null
     }
 
     void testGetTrustStoreFromDefault() {
+        given:
+        SimpleKeyStoreFactory.metaClass.getDefaultTrustStoreHome = {
+            'src/test/resources'
+        }
+        config.https.truststore.path = ''
+        config.https.truststore.pass = ''
+
+        when:
         SimpleKeyStoreFactory sksf = new SimpleKeyStoreFactory()
-        def trustStoreModel = sksf.getTrustStoreModel(new ConfigObject())
-        assert trustStoreModel.keystore, "KeyStore expected"
-        assert trustStoreModel.path == 'classpath:certs/truststore.jks'
+        def trustStoreModel = sksf.getTrustStoreModel()
+
+        then:
+        trustStoreModel.keystore != null
+        trustStoreModel.path == 'src/test/resources/truststore.jks'
     }
 }
