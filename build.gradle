@@ -16,7 +16,7 @@ plugins {
     id "com.jfrog.bintray" version "1.2"
 }
 
-version "0.1-SNAPSHOT"
+version "1.0.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
@@ -25,9 +25,6 @@ apply plugin: 'idea'
 apply plugin: "spring-boot"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
-// Used for publishing to central repository, remove if not needed
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
 
 ext {
     grailsVersion = project.grailsVersion
@@ -74,4 +71,57 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
+}
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    publications = ['maven']
+    publish = true
+    pkg {
+        userOrg = "bobbywarner"
+        repo = "grails-plugins"
+        name = "org.grails.plugins:http-builder-helper"
+        desc = "Grails HTTP Builder Helper Plugin"
+        issueTrackerUrl = "https://github.com/bobbywarner/grails-http-builder-helper/issues"
+        vcsUrl = "https://github.com/bobbywarner/grails-http-builder-helper"
+        licenses = ['Apache-2.0']
+        publicDownloadNumbers = true
+        version {
+            attributes = ['grails-plugin': "org.grails.plugins:http-builder-helper"]
+            name = project.version
+            gpg {
+                sign = false
+                passphrase = System.getenv("SIGNING_PASSPHRASE") ?: project.hasProperty("signingPassphrase") ? project.signingPassphrase : ''
+            }
+            mavenCentralSync {
+                sync = false
+                user = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
+                password = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom.withXml {
+                def pomNode = asNode()
+                pomNode.dependencyManagement.replaceNode {}
+                pomNode.dependencies.dependency.findAll {
+                    it.version.text().isEmpty()
+                }.each {
+                    it.replaceNode {}
+                }
+            }
+            artifactId project.name
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            artifact source:"${sourceSets.main.output.classesDir}/META-INF/grails-plugin.xml",
+                     classifier:"plugin",
+                     extension:'xml'
+        }
+    }
 }
