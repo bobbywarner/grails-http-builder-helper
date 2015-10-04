@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.rest
+package grails.plugin.httpbuilderhelper
 
 import groovyx.net.http.AsyncHTTPBuilder
 import groovyx.net.http.HTTPBuilder
@@ -23,38 +23,20 @@ import java.lang.reflect.InvocationTargetException
 
 import org.apache.http.impl.conn.ProxySelectorRoutePlanner
 
-import grails.plugin.rest.ssl.HTTPBuilderSSLConstants
-import grails.plugin.rest.ssl.HTTPBuilderSSLHelper
-import grails.plugin.rest.ssl.SimpleHTTPBuilderSSLHelper
+import grails.plugin.httpbuilderhelper.ssl.HTTPBuilderSSLConstants
+import grails.plugin.httpbuilderhelper.ssl.HTTPBuilderSSLHelper
+import grails.plugin.httpbuilderhelper.ssl.SimpleHTTPBuilderSSLHelper
 
 import grails.plugins.Plugin
 
-class RestGrailsPlugin extends Plugin {
+class HttpBuilderHelperGrailsPlugin extends Plugin {
     def grailsVersion = "3.0.0 > *"
-    def title = "Rest Plugin"
-    def author = "Bobby Warner"
-    def authorEmail = "bobbywarner@gmail.com"
-    def description = "Adds REST client capabilities with HttpBuilder"
     def profiles = ['web']
-    def license = "APACHE"
-    def documentation = "http://grails.org/plugin/rest"
-
-    def issueManagement = [system: 'GitHub', url: 'https://github.com/berngp/grails-rest/issues']
-    def scm = [system: 'GitHub', url: 'https://github.com/berngp/grails-rest']
-
-    def developers = [
-        [name: "Bobby Warner", email: "bobbywarner@gmail.com"],
-        [name: "Andres Almiray", email: "aalmiray@users.sourceforge.net"],
-        [name: "Bernardo Gomez-Palacio", email: "bernardo.gomezpalacio@gmail.com"],
-        [name: "Marco Vermeulen", email: "vermeulen.mp@gmail.com"]
-    ]
 
     private HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
     def doWithDynamicMethods = { ctx -> processArtifacts(application) }
-
     def onChange = { event -> processArtifacts(application) }
-
     def onConfigChange = { event -> processArtifacts(application) }
 
     private void processArtifacts(application) {

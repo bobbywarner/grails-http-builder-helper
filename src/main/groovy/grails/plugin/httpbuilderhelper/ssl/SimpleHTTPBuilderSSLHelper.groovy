@@ -1,4 +1,4 @@
-package grails.plugin.rest.ssl
+package grails.plugin.httpbuilderhelper.ssl
 
 import groovyx.net.http.HTTPBuilder
 import java.security.KeyManagementException
@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException
 import java.security.UnrecoverableKeyException
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
-import static grails.plugin.rest.ssl.HTTPBuilderSSLConstants.*
+import static grails.plugin.httpbuilderhelper.ssl.HTTPBuilderSSLConstants.*
 
 /**
  * Through its main method   {@link SimpleHTTPBuilderSSLHelper#addSSLSupport}   and using a   {@link KeyStoreFactory}

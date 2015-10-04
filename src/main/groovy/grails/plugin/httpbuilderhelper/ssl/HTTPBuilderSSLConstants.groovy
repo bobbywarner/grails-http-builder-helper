@@ -1,4 +1,4 @@
-package grails.plugin.rest.ssl
+package grails.plugin.httpbuilderhelper.ssl
 
 /**
  * Constants used across the different SSL Support classes.

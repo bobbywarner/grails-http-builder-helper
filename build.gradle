@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.2"
+    id "com.jfrog.bintray" version "1.3.1"
 }
 
 version "1.0.0"
@@ -33,7 +33,6 @@ ext {
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-
 
 repositories {
     mavenLocal()
@@ -79,27 +78,15 @@ bintray {
     publications = ['maven']
     publish = true
     pkg {
-        userOrg = "bobbywarner"
-        repo = "grails-plugins"
-        name = "org.grails.plugins:http-builder-helper"
-        desc = "Grails HTTP Builder Helper Plugin"
-        issueTrackerUrl = "https://github.com/bobbywarner/grails-http-builder-helper/issues"
-        vcsUrl = "https://github.com/bobbywarner/grails-http-builder-helper"
+        repo = 'grails-plugins'
+        userOrg = 'bobbywarner'
+        name = "$project.name"
         licenses = ['Apache-2.0']
+        desc = 'Grails HTTP Builder Helper Plugin'
+        websiteUrl = 'https://bobbywarner.github.io/grails-http-builder-helper'
+        issueTrackerUrl = 'https://github.com/bobbywarner/grails-http-builder-helper/issues'
+        vcsUrl = 'https://github.com/bobbywarner/grails-http-builder-helper'
         publicDownloadNumbers = true
-        version {
-            attributes = ['grails-plugin': "org.grails.plugins:http-builder-helper"]
-            name = project.version
-            gpg {
-                sign = false
-                passphrase = System.getenv("SIGNING_PASSPHRASE") ?: project.hasProperty("signingPassphrase") ? project.signingPassphrase : ''
-            }
-            mavenCentralSync {
-                sync = false
-                user = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
-                password = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
-            }
-        }
     }
 }
 
