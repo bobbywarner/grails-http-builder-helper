@@ -78,8 +78,8 @@ bintray {
     publications = ['maven']
     publish = true
     pkg {
-        repo = 'grails-plugins'
-        userOrg = 'bobbywarner'
+        repo = 'plugins'
+        userOrg = 'grails'
         name = "$project.name"
         licenses = ['Apache-2.0']
         desc = 'Grails HTTP Builder Helper Plugin'
