@@ -35,9 +35,14 @@ class HttpBuilderHelperGrailsPlugin extends Plugin {
 
     private HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
-    def doWithDynamicMethods = { ctx -> processArtifacts(application) }
-    def onChange = { event -> processArtifacts(application) }
-    def onConfigChange = { event -> processArtifacts(application) }
+    @Override
+	void doWithDynamicMethods() { processArtifacts(grailsApplication) }
+	
+	@Override
+	void onChange(Map<String, Object> event) { processArtifacts(grailsApplication) }
+	
+	@Override
+	void onConfigChange(Map<String, Object> event) { processArtifacts(grailsApplication) }
 
     private void processArtifacts(application) {
         def config = application.config
