@@ -30,18 +30,26 @@ import grails.plugin.httpbuilderhelper.ssl.SimpleHTTPBuilderSSLHelper
 import grails.plugins.Plugin
 
 class HttpBuilderHelperGrailsPlugin extends Plugin {
-    def grailsVersion = "3.0.0 > *"
+    def grailsVersion = "3.2.0 > *"
     def profiles = ['web']
+    def influences = ['controllers', 'services']
+    def loadAfter = ['controllers', 'services']
 
     private HTTPBuilderSSLHelper sslHelper = new SimpleHTTPBuilderSSLHelper()
 
-    def doWithDynamicMethods = { ctx -> processArtifacts(application) }
-    def onChange = { event -> processArtifacts(application) }
-    def onConfigChange = { event -> processArtifacts(application) }
+    @Override
+    void doWithDynamicMethods() {
+        processArtifacts(grailsApplication)
+    }
+    void onChange(Map<String, Object> event) {
+        processArtifacts(event.application)
+    }
+    void onConfigChange(Map<String, Object> event) {
+        processArtifacts(event.application)
+    }
 
     private void processArtifacts(application) {
-        def config = application.config
-        def types = config.grails?.rest?.injectInto ?: ["Controller", "Service"]
+        def types = application.config.getProperty('grails.rest.injectInto', List, ["Controller", "Service"])
         types.each { type ->
             application.getArtefacts(type).each { klass -> addDynamicMethods(klass, application) }
         }

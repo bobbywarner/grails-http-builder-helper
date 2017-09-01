@@ -1,7 +1,4 @@
 buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
     repositories {
         mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
@@ -11,25 +8,13 @@ buildscript {
     }
 }
 
-plugins {
-    id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.3.1"
-}
-
-version "1.0.2"
+version "1.1.0-SNAPSHOT"
 group "org.grails.plugins"
 
-apply plugin: 'maven-publish'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: "spring-boot"
-apply plugin: "org.grails.grails-plugin"
-apply plugin: "org.grails.grails-gsp"
-
-ext {
-    grailsVersion = project.grailsVersion
-    gradleWrapperVersion = project.gradleWrapperVersion
-}
+apply plugin: "org.springframework.boot"
+apply plugin:"org.grails.grails-plugin"
+apply plugin:"org.grails.grails-plugin-publish"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -49,7 +34,6 @@ dependencyManagement {
 
 dependencies {
     provided 'org.springframework.boot:spring-boot-starter-logging'
-    provided "org.springframework.boot:spring-boot-starter-actuator"
     provided "org.springframework.boot:spring-boot-autoconfigure"
     provided "org.springframework.boot:spring-boot-starter-tomcat"
 
@@ -63,7 +47,6 @@ dependencies {
 
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1') {
         exclude module: "commons-logging"
-        exclude module: "xml-apis"
         exclude module: "groovy"
     }
 }
@@ -72,44 +55,16 @@ task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    publications = ['maven']
-    publish = true
-    pkg {
-        repo = 'plugins'
-        userOrg = 'grails'
-        name = "$project.name"
-        licenses = ['Apache-2.0']
-        desc = 'Grails HTTP Builder Helper Plugin'
-        websiteUrl = 'https://bobbywarner.github.io/grails-http-builder-helper'
-        issueTrackerUrl = 'https://github.com/bobbywarner/grails-http-builder-helper/issues'
-        vcsUrl = 'https://github.com/bobbywarner/grails-http-builder-helper'
-        publicDownloadNumbers = true
-        attributes = ['http': '', 'rest': '']
-    }
-}
+bootRepackage.enabled = false
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            pom.withXml {
-                def pomNode = asNode()
-                pomNode.dependencyManagement.replaceNode {}
-                pomNode.dependencies.dependency.findAll {
-                    it.version.text().isEmpty()
-                }.each {
-                    it.replaceNode {}
-                }
-            }
-            artifactId project.name
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-            artifact source:"${sourceSets.main.output.classesDir}/META-INF/grails-plugin.xml",
-                     classifier:"plugin",
-                     extension:'xml'
-        }
+grailsPublish {
+    user = System.getenv("BINTRAY_USER")
+    key =  System.getenv("BINTRAY_KEY")
+    githubSlug = 'bobbywarner/grails-http-builder-helper'
+    license {
+        name = 'Apache-2.0'
     }
+    title = "http-builder-helper"
+    desc = 'Grails HTTP Builder Helper Plugin'
+    developers = [bobbywarner:"Bobby Warner"]
 }
